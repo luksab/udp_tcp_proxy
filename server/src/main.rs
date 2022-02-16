@@ -2,7 +2,7 @@ use std::net::UdpSocket;
 use std::thread;
 use std::time::Duration;
 
-const BUFFER_SIZE: usize = 512;
+const BUFFER_SIZE: usize = 1024;
 
 fn upd_stuff() {
     let udp_socket = UdpSocket::bind("127.0.0.1:34255").unwrap();
@@ -10,9 +10,9 @@ fn upd_stuff() {
     let mut now = std::time::Instant::now();
     let mut counter = 0;
     loop {
-        for i in 0..BUFFER_SIZE {
-            buf[i] = fastrand::u8(0..=255);
-        }
+        // for i in 0..BUFFER_SIZE {
+        //     buf[i] = fastrand::u8(0..=255);
+        // }
         udp_socket.send_to(&buf, "127.0.0.1:34254").unwrap();
         counter += 1;
         if now.elapsed() > Duration::from_secs(1) {

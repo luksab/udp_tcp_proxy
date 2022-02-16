@@ -40,18 +40,19 @@ fn upd_stuff(sender: Arc<Mutex<Bus<Vec<u8>>>>) {
                     // }
                     sender.lock().unwrap().broadcast(Vec::from(total_buffer));
                     current_buffer_index = 0;
+
+                    perf_counter += 1;
+                    if perf_clock.elapsed().as_secs() > 1 {
+                        println!(
+                            "received {} packets aka {} MB",
+                            perf_counter,
+                            perf_counter * BUFFER_SIZE / 1024 / 1024
+                        );
+                        perf_counter = 0;
+                        perf_clock = Instant::now();
+                    }
                 }
 
-                perf_counter += 1;
-                if perf_clock.elapsed().as_secs() > 1 {
-                    println!(
-                        "received {} packets aka {} MB",
-                        perf_counter,
-                        perf_counter * BUFFER_SIZE / 1024 / 1024
-                    );
-                    perf_counter = 0;
-                    perf_clock = Instant::now();
-                }
                 // sender.send(()).unwrap();
                 // println!("Received {} bytes from {}", amt, src);
                 // println!("{}", String::from_utf8_lossy(buf));

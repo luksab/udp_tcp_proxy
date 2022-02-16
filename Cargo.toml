@@ -1,5 +1,8 @@
 [workspace]
 members = [
     "proxy",
+    "tokio_server",
+    "tokio_proxy",
+    "tokio_client",
     "server"
 ]
