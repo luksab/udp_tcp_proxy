@@ -12,6 +12,15 @@ use tokio::net::UdpSocket;
 use tokio::sync::broadcast::{self, Receiver};
 use tokio::sync::RwLock;
 
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+struct Opt {
+    /// whether to request lower requirements for the GPU
+    #[structopt(short, long = "address", default_value = "127.0.0.1:34254")]
+    address: String,
+}
+
 const BUFFER_SIZE: usize = 1024 * 32;
 
 async fn upd_stuff(
@@ -42,7 +51,7 @@ async fn upd_stuff(
                 // }
                 // sender.lock().unwrap().broadcast(Vec::from(buf));
                 sender.send(Vec::from(buf)).unwrap();
-                tokio::time::sleep(Duration::from_millis(1)).await;
+                // tokio::time::sleep(Duration::from_millis(1)).await;
 
                 perf_counter.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 // }
@@ -58,12 +67,14 @@ async fn upd_stuff(
 
 #[tokio::main]
 async fn main() {
+    let opt: Opt = Opt::from_args();
+
     let (tx, mut rx1) = broadcast::channel(16);
 
     let tcp_listener = TcpListener::bind("127.0.0.1:7878").await.unwrap();
     // let tcp_pool = ThreadPool::new(4, bus.clone());
 
-    let udp_socket = Arc::new(UdpSocket::bind("127.0.0.1:34254").await.unwrap());
+    let udp_socket = Arc::new(UdpSocket::bind(opt.address).await.unwrap());
 
     let atomic_counter = Arc::new(AtomicUsize::new(0));
     for _ in 0..12 {

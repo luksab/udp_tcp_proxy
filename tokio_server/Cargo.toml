@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 fastrand = "1.7.0"
 tokio = { version = "1", features = ["full"] }
+structopt = "0.3"

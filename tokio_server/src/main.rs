@@ -6,8 +6,19 @@ use tokio::net::UdpSocket;
 
 const BUFFER_SIZE: usize = 1024*32;
 
+use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+struct Opt {
+    /// whether to request lower requirements for the GPU
+    #[structopt(short, long = "address", default_value = "127.0.0.1:34254")]
+    address: String,
+}
+
 #[tokio::main]
 async fn main() -> io::Result<()> {
+    let opt = Opt::from_args();
+
     let sock = UdpSocket::bind("0.0.0.0:8080").await?;
     let r = Arc::new(sock);
     let atomic_counter = Arc::new(AtomicUsize::new(0));
@@ -16,6 +27,7 @@ async fn main() -> io::Result<()> {
         println!("new thread");
         let s = r.clone();
         let counter = atomic_counter.clone();
+        let address = opt.address.clone();
         tokio::spawn(async move {
             let mut buf = [0; BUFFER_SIZE];
             for _ in 0..BUFFER_SIZE {
@@ -25,7 +37,7 @@ async fn main() -> io::Result<()> {
             loop {
                 // let (len, addr) = sock.recv_from(&mut buf).await?;
                 // println!("{:?} bytes received from {:?}", len, addr);
-                let _ = s.send_to(&buf, "127.0.0.1:34254").await.unwrap();
+                let _ = s.send_to(&buf, &address).await.unwrap();
                 // println!("{:?} bytes sent", len);
 
                 counter.fetch_add(1, Ordering::Relaxed);
